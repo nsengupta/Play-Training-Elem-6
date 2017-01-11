@@ -5,7 +5,7 @@
 # An example controller showing a sample home page
 GET     /                           controllers.AttendeesController.index
 
-#GET     /count                      controllers.AttendeesController.count
+GET     /count                      controllers.AttendeesController.count
 
 GET     /all                        controllers.AttendeesController.getAll
 

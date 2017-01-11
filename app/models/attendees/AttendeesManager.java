@@ -2,11 +2,9 @@ package models.attendees;
 
 import java.util.List;
 
-import models.attendees.StarPlayers.SoccerAttendeesManager;
-
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(SoccerAttendeesManager.class)
+
 public interface AttendeesManager {
 	
 	public List<String> getAll();
