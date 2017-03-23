@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.inject.ImplementedBy;
 
 
+@ImplementedBy (SoccerAttendeesManager.class)
 public interface AttendeesManager {
 	
 	public List<String> getAll();

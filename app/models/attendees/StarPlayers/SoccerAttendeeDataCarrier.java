@@ -5,6 +5,8 @@ public class SoccerAttendeeDataCarrier {
 	public String           firstName;
 	public String           lastName;
 	
+	
+	public SoccerAttendeeDataCarrier() { }
 	public SoccerAttendeeDataCarrier(String firstName, String lastName) {
 		super();
 		this.firstName = firstName;

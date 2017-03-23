@@ -7,13 +7,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
+import models.attendees.AttendeesManager;
 import models.attendees.StarPlayers.SoccerAttendeeDataCarrier;
 import play.data.Form;
 import play.data.FormFactory;
 import play.db.Database;
+import play.libs.Akka;
+import play.libs.concurrent.HttpExecution;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
@@ -24,32 +29,34 @@ import views.html.attendees.list;
 import views.html.attendees.count;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import play.api.libs.concurrent.*;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class AttendeesController extends Controller {
-	/**
-     * An action that renders an HTML page with a welcome message.
-     * The configuration in the <code>routes</code> file means that
-     * this method will be called when the application receives a
-     * <code>GET</code> request with a path of <code>/</code>.
-     */
 	@Inject
     FormFactory formFactory;
 	
 	private final ActorRef soccerAttendeesInfoActor;
 	private final Database  databaseHandle;
+	private final AttendeesManager attendeesManager;
 	
 	@Inject
-    public AttendeesController(ActorSystem actorSystem, Database database) throws SQLException {
+	private HttpExecutionContext context;
+	
+	@Inject
+    public AttendeesController(ActorSystem actorSystem, Database database, AttendeesManager attendeesManager) throws SQLException {
 	   this.databaseHandle = database;	
        this.soccerAttendeesInfoActor = 
     		   actorSystem
     		   .actorOf(
     				   SoccerAttendeesInfoActor.props(this.databaseHandle),
     				   "Soccer-Players-Actor");
+       
+       this.attendeesManager = attendeesManager;
     }
 	
 	
@@ -63,6 +70,7 @@ public class AttendeesController extends Controller {
     		List<String> s = (ArrayList<String>)r;
     		return (s);
     	};
+    	
     	
         return( FutureConverters.toJava(ask(soccerAttendeesInfoActor,
 			    new SoccerInfoMessageProtocol.GetAllMessage(), 
@@ -78,16 +86,16 @@ public class AttendeesController extends Controller {
     	return TODO;
     }
     
+    
     public CompletionStage<Result> count() {
-    	Function<Object,Integer> fn = (r) -> {
-    		Integer s = (Integer) r;
-    		return (s);
-    	};
-    	return( FutureConverters.toJava(ask(soccerAttendeesInfoActor,
-			    new SoccerInfoMessageProtocol.CountMessage(), 
-				1000))
-                .thenApply(fn)
-                .thenApply(countReturned -> ok(count.render(countReturned))));
+    	
+    	return(
+    			
+    			CompletableFuture
+    			.supplyAsync(() -> this.attendeesManager.attendeeCount())
+    			.thenApplyAsync(c -> ok(count.render(c)),context.current())
+    			
+    		  );
     }
     
     public Result addAttendee(String surname,String firstname) {
