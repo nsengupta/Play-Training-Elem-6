@@ -1,0 +1,7 @@
+Create two databases: Cricket and Soccer Players
+* Each Player has a ranking (integer)
+* Provide access to Ranking of Cricket and Soccer players, by using
+  In-memory hash-map (attendeesDB)
+  H2 Database
+* Provide a REST Endpoint to modify the ranking of a player
+
