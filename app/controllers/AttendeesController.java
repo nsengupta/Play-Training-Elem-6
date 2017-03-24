@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -17,6 +18,7 @@ import play.data.Form;
 import play.data.FormFactory;
 import play.db.Database;
 import play.libs.Akka;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecution;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -27,11 +29,11 @@ import services.attendees.starPlayers.SoccerInfoMessageProtocol;
 import views.html.index;
 import views.html.attendees.list;
 import views.html.attendees.count;
+import views.html.attendees.countJson;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import play.api.libs.concurrent.*;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -93,10 +95,11 @@ public class AttendeesController extends Controller {
     			
     			CompletableFuture
     			.supplyAsync(() -> this.attendeesManager.attendeeCount())
-    			.thenApplyAsync(c -> ok(count.render(c)),context.current())
+    			.thenApply(c -> ok(count.render(c)))
     			
     		  );
     }
+     
     
     public Result addAttendee(String surname,String firstname) {
     	return TODO;
